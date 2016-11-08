@@ -48,6 +48,19 @@ class BTransSupplierError(BTransError):
         super().__init__(message = message)
 
 
+class HttpITarget(Target):
+    import urllib.request
+
+    def __init__(self, uri_parsed , *args, **kwargs):
+        super().__init__(uri_parsed)
+        self.__logger = logging.getLogger(__name__)
+
+    def size(self):
+        req = urllib.request.Request(self.__turl, method="HEAD")
+        resp = urllib.request.urlopen(req)
+        num_bytes = resp.info().get('content-length')
+        return num_bytes
+
 class FileITarget(Target):
 
     # A default Block segment of 4KB
@@ -173,7 +186,7 @@ class FileOTarget(Target):
 
     def __size_block_device(self):
         if self.__tfd == -1:
-            raise BTransError("Input URI can not be sized")
+            raise BTransError("Output URI can not be sized")
         tfs = os.lseek(self.__tfd, os.SEEK_SET, os.SEEK_END)
         return tfs
 
