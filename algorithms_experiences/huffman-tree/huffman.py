@@ -10,12 +10,34 @@ class HeapNode:
         self.left = None
         self.right = None
 
-    def __cmp__(self, other):
-        if (other == None):
-            return -1
-        if (not isinstance(other, HeapNode)):
-            return -1
-        return self.freq > other.freq
+    def __eq__(self, other):
+        return HeapNode.__check(other) and (self.freq == other.freq)
+
+    def __ne__(self, other):
+        return HeapNode.__check(other) and (self.freq != other.freq)
+
+    def __lt__(self, other):
+        return HeapNode.__check(other) and (self.freq < other.freq)
+
+    def __le__(self, other):
+        return HeapNode.__check(other) and (self.freq <= other.freq)
+
+    def __gt__(self, other):
+        return HeapNode.__check(other) and (self.freq > other.freq)
+
+    def __ge__(self, other):
+        return HeapNode.__check(other) and (self.freq >= other.freq)
+
+    @staticmethod
+    def __check(other):
+        if other is None:
+            return False
+        if not isinstance(other, HeapNode):
+            return False
+        return True
+
+    def __repr__(self):
+        return "Char[%s]->Freq[%s]" % (self.c, self.freq)
 
 
 def _apply_merge(heap):
