@@ -133,8 +133,20 @@ def _decode_text(reverse_mapping, encoded_text):
     return decoded_text
 
 
+def _getridof_padding(padded_encoded_text):
+    '''
+    Removes padding from text encoded with
+    '''
+    padded_info = padded_encoded_text[:8]
+    extra_padding = int(padded_info, 2)
 
-class HuffmanExample:
+    padded_encoded_text = padded_encoded_text[8:]
+    encoded_text = padded_encoded_text[:-1 * extra_padding]
+
+    return encoded_text
+
+
+class HuffmanExample(object):
 
     def __init__(self, path):
         self.path = path
@@ -154,17 +166,6 @@ class HuffmanExample:
         print("Compressed")
         return output_path
 
-    """ functions for decompression: """
-
-    def remove_padding(self, padded_encoded_text):
-        padded_info = padded_encoded_text[:8]
-        extra_padding = int(padded_info, 2)
-
-        padded_encoded_text = padded_encoded_text[8:]
-        encoded_text = padded_encoded_text[:-1 * extra_padding]
-
-        return encoded_text
-
     def decompress(self, input_path):
         filename, file_extension = os.path.splitext(self.path)
         output_path = filename + "_decompressed" + ".txt"
@@ -179,7 +180,7 @@ class HuffmanExample:
                 bit_string += bits
                 byte = file.read(1)
 
-            encoded_text = self.remove_padding(bit_string)
+            encoded_text = _getridof_padding(bit_string)
 
             decompressed_text = _decode_text(self.reverse_mapping, encoded_text)
             output.write(decompressed_text)
