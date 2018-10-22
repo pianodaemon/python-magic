@@ -3,11 +3,10 @@ import os
 from collections import Counter
 
 
-class HuffmanPartialTree:
+class HuffmanPartialTree(object):
     '''
     Representation of a Huffman's partial tree
     '''
-
     def __init__(self, char, freq):
         self.char = char
         self.freq = freq
@@ -15,22 +14,22 @@ class HuffmanPartialTree:
         self.right = None
 
     def __eq__(self, other):
-        return HuffmanPartialTree.__check(other) and (self.freq == other.freq)
+        return HuffmanPartialTree.__check(other) and self.freq == other.freq
 
     def __ne__(self, other):
-        return HuffmanPartialTree.__check(other) and (self.freq != other.freq)
+        return HuffmanPartialTree.__check(other) and self.freq != other.freq
 
     def __lt__(self, other):
-        return HuffmanPartialTree.__check(other) and (self.freq < other.freq)
+        return HuffmanPartialTree.__check(other) and self.freq < other.freq
 
     def __le__(self, other):
-        return HuffmanPartialTree.__check(other) and (self.freq <= other.freq)
+        return HuffmanPartialTree.__check(other) and self.freq <= other.freq
 
     def __gt__(self, other):
-        return HuffmanPartialTree.__check(other) and (self.freq > other.freq)
+        return HuffmanPartialTree.__check(other) and self.freq > other.freq
 
     def __ge__(self, other):
-        return HuffmanPartialTree.__check(other) and (self.freq >= other.freq)
+        return HuffmanPartialTree.__check(other) and self.freq >= other.freq
 
     @staticmethod
     def __check(other):
@@ -97,13 +96,28 @@ def _byte_dump(padded_encoded_text):
         b.append(int(byte, 2))
     return b
 
+def huffman_compress(text):
+    '''
+    Executes every step required to carry compress out
+    '''
+    heap = _conform_heap(Counter(text))
+    while len(heap) > 1:
+        # merge shall be repeated until all
+        # of Huffman's trees has been combined into one
+        _apply_merge(heap)
+
+    codes, reverse_mapping = {}, {}
+    _codify(codes, reverse_mapping, heapq.heappop(heap))
+
+    encoded_text = ''.join([codes[c] for c in text])
+    padded_encoded_text = _padding(encoded_text)
+
+    return reverse_mapping, bytes(_byte_dump(padded_encoded_text))
 
 class HuffmanCoding:
 
     def __init__(self, path):
         self.path = path
-        self.heap = []
-        self.codes = {}
         self.reverse_mapping = {}
 
     def compress(self):
@@ -114,18 +128,8 @@ class HuffmanCoding:
             text = file.read()
             text = text.rstrip()
 
-            self.heap = _conform_heap(Counter(text))
-            while len(self.heap) > 1:
-                # merge shall be repeated until all
-                # of Huffman's trees has been combined into one
-                _apply_merge(self.heap)
-
-            _codify(self.codes, self.reverse_mapping, heapq.heappop(self.heap))
-
-            encoded_text = ''.join([self.codes[c] for c in text])
-            padded_encoded_text = _padding(encoded_text)
-
-            output.write(bytes(_byte_dump(padded_encoded_text)))
+            self.reverse_mapping, ba = huffman_compress(text)
+            output.write(ba)
 
         print("Compressed")
         return output_path
