@@ -87,6 +87,7 @@ def _padding(enc_text):
     pad_info = "{0:08b}".format(extra_pad)
     return pad_info + enc_text + ''.join(["0"] * extra_pad)
 
+
 def _byte_dump(padded_encoded_text):
     if len(padded_encoded_text) % 8 != 0:
         raise Exception("Encoded text not padded properly")
@@ -95,6 +96,7 @@ def _byte_dump(padded_encoded_text):
         byte = padded_encoded_text[i:i + 8]
         b.append(int(byte, 2))
     return b
+
 
 def huffman_compress(text):
     '''
@@ -114,7 +116,25 @@ def huffman_compress(text):
 
     return reverse_mapping, bytes(_byte_dump(padded_encoded_text))
 
-class HuffmanCoding:
+
+def _decode_text(reverse_mapping, encoded_text):
+    '''
+    Decodes text enconded with basis on
+    reverse mapping table
+    '''
+    current = ""
+    decoded_text = ""
+    for bit in encoded_text:
+        current += bit
+        if (current in reverse_mapping):
+            character = reverse_mapping[current]
+            decoded_text += character
+            current = ""
+    return decoded_text
+
+
+
+class HuffmanExample:
 
     def __init__(self, path):
         self.path = path
@@ -145,19 +165,6 @@ class HuffmanCoding:
 
         return encoded_text
 
-    def decode_text(self, encoded_text):
-        current_code = ""
-        decoded_text = ""
-
-        for bit in encoded_text:
-            current_code += bit
-            if (current_code in self.reverse_mapping):
-                character = self.reverse_mapping[current_code]
-                decoded_text += character
-                current_code = ""
-
-        return decoded_text
-
     def decompress(self, input_path):
         filename, file_extension = os.path.splitext(self.path)
         output_path = filename + "_decompressed" + ".txt"
@@ -174,7 +181,7 @@ class HuffmanCoding:
 
             encoded_text = self.remove_padding(bit_string)
 
-            decompressed_text = self.decode_text(encoded_text)
+            decompressed_text = _decode_text(self.reverse_mapping, encoded_text)
             output.write(decompressed_text)
 
         print("Decompressed")
